@@ -5,56 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Поиск попутчиков</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    h1 { font-size: 24px; }
-    label, select { display: block; margin: 10px 0; }
-    .results { margin-top: 20px; }
-    .ad { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    form {
+      margin-bottom: 2rem;
+    }
+    label, select, button {
+      display: block;
+      margin-top: 1rem;
+    }
+    .post {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      text-align: left;
+    }
+    .post a {
+      font-weight: bold;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
   <h1>Поиск попутчиков</h1>
-  <label for="country">Страна назначения:</label>
-  <select id="country">
-    <option value="">Выберите страну</option>
-  </select>
+  <form id="searchForm">
+    <label for="country">Страна назначения:</label>
+    <select id="country" name="country" required>
+      <option value="">Выберите страну...</option>
+    </select>
+    <button type="submit">Найти</button>
+  </form>
 
-  <div class="results" id="results">
-    <p>Выберите страну, чтобы увидеть объявления...</p>
-  </div>
+  <div id="results">Здесь появятся результаты поиска...</div>
 
   <script src="countries.js"></script>
   <script>
-    const countrySelect = document.getElementById("country");
-    const resultsDiv = document.getElementById("results");
-
-    countries.forEach(country => {
-      const option = document.createElement("option");
-      option.value = country;
-      option.textContent = country;
-      countrySelect.appendChild(option);
+    const select = document.getElementById('country');
+    countries.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.code;
+      opt.textContent = c.name;
+      select.appendChild(opt);
     });
 
-    countrySelect.addEventListener("change", () => {
-      const selected = countrySelect.value;
-      resultsDiv.innerHTML = "";
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const country = select.value;
+      document.getElementById('results').textContent = 'Загрузка...';
 
-      if (!selected) {
-        resultsDiv.innerHTML = "<p>Выберите страну, чтобы увидеть объявления...</p>";
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.mahnem.ru/country-' + country + '.html')}`);
+      const data = await res.json();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(data.contents, 'text/html');
+      const items = doc.querySelectorAll('.posts-list .post');
+
+      const results = document.getElementById('results');
+      results.innerHTML = '';
+
+      if (items.length === 0) {
+        results.textContent = 'Объявлений не найдено.';
         return;
       }
 
-      // Пример объявлений (эмулируем)
-      const ads = [
-        { title: "Ищу попутчика в " + selected, desc: "Выезд в июле, бюджет небольшой" },
-        { title: "Поездка в " + selected + " вместе?", desc: "Девушка 30 лет, ищу компанию" },
-      ];
-
-      ads.forEach(ad => {
-        const adDiv = document.createElement("div");
-        adDiv.className = "ad";
-        adDiv.innerHTML = `<strong>${ad.title}</strong><p>${ad.desc}</p>`;
-        resultsDiv.appendChild(adDiv);
+      [...items].slice(0, 10).forEach(el => {
+        const link = el.querySelector('a');
+        const date = el.querySelector('.post-date');
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `<a href="https://www.mahnem.ru${link.getAttribute('href')}" target="_blank">${link.textContent.trim()}</a><br><small>${date ? date.textContent.trim() : ''}</small>`;
+        results.appendChild(div);
       });
     });
   </script>
