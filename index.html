@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Поиск попутчиков</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    h1 { font-size: 24px; }
+    label, select { display: block; margin: 10px 0; }
+    .results { margin-top: 20px; }
+    .ad { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Поиск попутчиков</h1>
+  <label for="country">Страна назначения:</label>
+  <select id="country">
+    <option value="">Выберите страну</option>
+  </select>
+
+  <div class="results" id="results">
+    <p>Выберите страну, чтобы увидеть объявления...</p>
+  </div>
+
+  <script src="countries.js"></script>
+  <script>
+    const countrySelect = document.getElementById("country");
+    const resultsDiv = document.getElementById("results");
+
+    countries.forEach(country => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.textContent = country;
+      countrySelect.appendChild(option);
+    });
+
+    countrySelect.addEventListener("change", () => {
+      const selected = countrySelect.value;
+      resultsDiv.innerHTML = "";
+
+      if (!selected) {
+        resultsDiv.innerHTML = "<p>Выберите страну, чтобы увидеть объявления...</p>";
+        return;
+      }
+
+      // Пример объявлений (эмулируем)
+      const ads = [
+        { title: "Ищу попутчика в " + selected, desc: "Выезд в июле, бюджет небольшой" },
+        { title: "Поездка в " + selected + " вместе?", desc: "Девушка 30 лет, ищу компанию" },
+      ];
+
+      ads.forEach(ad => {
+        const adDiv = document.createElement("div");
+        adDiv.className = "ad";
+        adDiv.innerHTML = `<strong>${ad.title}</strong><p>${ad.desc}</p>`;
+        resultsDiv.appendChild(adDiv);
+      });
+    });
+  </script>
+</body>
+</html>
