@@ -118,7 +118,7 @@ const countries = [
       const country = select.value;
       document.getElementById('results').textContent = 'Загрузка...';
 
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.mahnem.ru/country-' + country + '.html')}`);
+      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://www.mahnem.ru/country-' + country + '.html')}`);
       const data = await res.json();
       const parser = new DOMParser();
       const doc = parser.parseFromString(data.contents, 'text/html');
